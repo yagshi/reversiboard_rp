@@ -2,12 +2,12 @@
 
 class ReversiBoard
   private
-  CSize = 80    # 1マスのサイズ (pixel)
-  Padding = 16  # ゲーム版上下左右の余白
+  @rp                      # ruby processing Sketch のインスタンス
+  CSize = 80               # 1マスのサイズ (pixel)
+  Padding = 16             # ゲーム盤上下左右の余白
   Black = [0, 0, 0]        # 黒石の色
   White = [255, 255, 255]  # 白石の色
   Dir8 = [[1, 0], [1, -1], [0, -1], [-1, -1], [-1, 0], [-1, 1], [0, 1], [1, 1]]
-  @rp           # ruby processing インスタンス
 
   public
   # @!attribute data [rw]

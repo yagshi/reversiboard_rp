@@ -22,3 +22,5 @@ require "./reversiboard"
 $rb = ReversiBoard.new(self)
 ```
 
+
+![スクリーンショット](reversiss.png)
