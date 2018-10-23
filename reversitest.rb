@@ -6,7 +6,6 @@ $playerTurn = true
 
 def setup
   $b = ReversiBoard.new(self)     # リバーシ盤作成
-  
 end
 
 def draw
@@ -31,4 +30,6 @@ def mouse_clicked
     }
     $b.put(x: x2, y: y2, color: :black)
   end
+  puts "white=%d" % ($b.count(color: :white))
+  puts "black=%d" % ($b.count(color: :black))
 end

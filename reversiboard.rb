@@ -1,17 +1,25 @@
 # coding: utf-8
 
 class ReversiBoard
-  attr_accessor :data    # 0=空, 1=白, 2 =黒
-  CSize = 80    # 1マスのサイズ
-  Padding = 16
-  Black = [0, 0, 0]
-  White = [255, 255, 255]
+  private
+  CSize = 80    # 1マスのサイズ (pixel)
+  Padding = 16  # ゲーム版上下左右の余白
+  Black = [0, 0, 0]        # 黒石の色
+  White = [255, 255, 255]  # 白石の色
   Dir8 = [[1, 0], [1, -1], [0, -1], [-1, -1], [-1, 0], [-1, 1], [0, 1], [1, 1]]
   @rp           # ruby processing インスタンス
 
-  # x, y 座標に石を配置。color は :black もしくは :white
-  # autoflip: true にするとひっくり返す。
-  def put(x: 0, y: 0, color: 0, autoflip: false)
+  public
+  # @!attribute data [rw]
+  # @return [Integer] 8x8 の配列で 0=空, 1=白, 2 =黒 として状態を保存. 行(y), 列(x)の順
+  attr_accessor :data
+
+  # x, y 座標に石を配置. color は :black もしくは :white
+  # @param x [Integer] x 座標 (0-7)
+  # @param y [Integer] y 座標 (0-7)
+  # @param color [Symbol] 色 (:white か :black)
+  # @param  autoflip [Boolean] 置いたら自動でひっくり返すか
+  def put(x: 0, y: 0, color: :white, autoflip: false)
     raise "position out of range" if x < 0 || y < 0 || x > 7 || y > 7
     case color
     when :black
@@ -21,8 +29,9 @@ class ReversiBoard
     end
   end
 
-  def initialize(aRp)
-    @rp = aRp
+  # @param sketch [Sketch] ruby-processing のスケッチ. 通常 self を渡せば ok
+  def initialize(sketch)
+    @rp = sketch
     @rp.size CSize * 8 + Padding * 2, CSize * 8 + Padding * 2
     @data = Array.new(8).map {Array.new(8).map {0}}
     put(x: 3, y: 3, color: :white)
@@ -31,6 +40,8 @@ class ReversiBoard
     put(x: 4, y: 3, color: :black)
   end
 
+  # ゲーム盤表示 ruby-processing スケッチの draw から呼び出せばいい
+  # @return [nil]
   def show
     @rp.background 32, 120, 32
     @rp.stroke *Black
@@ -60,9 +71,13 @@ class ReversiBoard
                     CSize * 16 / 20, CSize * 16 / 20
       }
     }
+    nil
   end
 
   # マウス座標をボード座標(0-7)に変換 (はみ出たら強制的に0〜7に)
+  # @param x [Integer] マウスの x 座標
+  # @param y [Integer] マウスの y 座標
+  # @return [Array] ボードの [x, y] 座標 (0-7)
   def mouse2board(x: 0, y: 0)
     x1 = (x - Padding) / CSize
     y1 = (y - Padding) / CSize
@@ -73,7 +88,11 @@ class ReversiBoard
     return [x1, y1]
   end
 
-  # その色がその場所に置けるかどうか true/false で返す。
+  # その色がその場所に置けるかどうか true/false で返す.
+  # @param x [Integer] x 座標 (0-7)
+  # @param y [Integer] y 座標 (0-7)
+  # @param color [Symbol] :white か :black
+  # @return [Boolean]
   def can_put(x: 0, y: 0, color: :white)
     raise "position out of range" if x < 0 || y < 0 || x > 7 || y > 7
     return false if @data[y][x] != 0
@@ -97,5 +116,17 @@ class ReversiBoard
       }
     }
     putFlag
+  end
+
+  # 石の数を数える.
+  # @param color [Symbol] :white か :black
+  # @return [Integer]
+  def count(color: :white)
+    tgt = (color == :white) ? 1 : 2
+    @data.inject(0) {|acc, row|
+      acc + row.inject(0) {|a, x|
+        a + ((x == tgt) ? 1 : 0)
+      }
+    }
   end
 end
