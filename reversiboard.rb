@@ -19,13 +19,42 @@ class ReversiBoard
   # @param y [Integer] y 座標 (0-7)
   # @param color [Symbol] 色 (:white か :black)
   # @param  autoflip [Boolean] 置いたら自動でひっくり返すか
-  def put(x: 0, y: 0, color: :white, autoflip: false)
+  def put(x: 0, y: 0, color: :white, autoflip: true)
     raise "position out of range" if x < 0 || y < 0 || x > 7 || y > 7
     case color
     when :black
       @data[y][x] = 2
     when :white
       @data[y][x] = 1
+    end
+    me = (color == :white) ? 1 : 2
+    opp = (color == :white) ? 2 : 1
+    if autoflip
+      Dir8.each {|u, v|
+        x1, y1 = x, y
+        cur = opp
+        loop {
+          x1 = x1 + u
+          y1 = y1 + v
+          break if x1 < 0 || x1 > 7 || y1 < 0 || y1 > 7
+          break if @data[y1][x1] == 0
+          if @data[y1][x1] == me
+            if cur == me
+              x1, y1 = x + u, y + v
+              while @data[y1][x1] == opp
+                @data[y1][x1] = me
+                x1 = x1 + u
+                y1 = y1 + v
+              end
+              break
+            else
+              break
+            end
+          else
+            cur = me
+          end
+        }
+      }
     end
   end
 

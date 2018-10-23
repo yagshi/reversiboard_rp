@@ -29,6 +29,7 @@ def mouse_clicked
       }
     }
     $b.put(x: x2, y: y2, color: :black)
+    $playerTurn = true
   end
   puts "white=%d" % ($b.count(color: :white))
   puts "black=%d" % ($b.count(color: :black))
