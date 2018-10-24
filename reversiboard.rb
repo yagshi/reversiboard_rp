@@ -8,6 +8,7 @@ class ReversiBoard
   Black = [0, 0, 0]        # 黒石の色
   White = [255, 255, 255]  # 白石の色
   Dir8 = [[1, 0], [1, -1], [0, -1], [-1, -1], [-1, 0], [-1, 1], [0, 1], [1, 1]]
+  @frames                  # アニメーション表示ようの配列。先頭は @data。
 
   public
   # @!attribute data [rw]
@@ -21,6 +22,7 @@ class ReversiBoard
   # @param  autoflip [Boolean] 置いたら自動でひっくり返すか
   def put(x: 0, y: 0, color: :white, autoflip: true)
     raise "position out of range" if x < 0 || y < 0 || x > 7 || y > 7
+    @frames.insert 1, @data.map {|i| i.map{|j| j}}
     case color
     when :black
       @data[y][x] = 2
@@ -63,6 +65,7 @@ class ReversiBoard
     @rp = sketch
     @rp.size CSize * 8 + Padding * 2, CSize * 8 + Padding * 2
     @data = Array.new(8).map {Array.new(8).map {0}}
+    @frames = [@data]
     put(x: 3, y: 3, color: :white)
     put(x: 4, y: 4, color: :white)
     put(x: 3, y: 4, color: :black)
@@ -92,14 +95,15 @@ class ReversiBoard
     @rp.stroke_width 1
     8.times {|y|
       8.times {|x|
-        next if @data[y][x] == 0
-        @rp.stroke *(@data[y][x] == 2 ? White : Black)
-        @rp.fill *(@data[y][x] == 1 ? White : Black)
+        next if @frames[-1][y][x] == 0
+        @rp.stroke *(@frames[-1][y][x] == 2 ? White : Black)
+        @rp.fill *(@frames[-1][y][x] == 1 ? White : Black)
         @rp.ellipse Padding + x * CSize + CSize / 2,
                     Padding + y * CSize + CSize / 2,
                     CSize * 16 / 20, CSize * 16 / 20
       }
     }
+    @frames.pop if @frames.length > 1
     nil
   end
 
