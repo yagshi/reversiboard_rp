@@ -15,22 +15,20 @@ end
 def mouse_clicked
   return unless $playerTurn
   bx, by = $b.mouse2board(x: mouseX, y: mouseY)
-  if $b.can_put(x: bx, y: by, color: :white)
-    $b.put(x: bx, y: by, color: :white)   # 左クリック→白
+  if $b.can_put?(x: bx, y: by, color: :white)
+    $b.put(x: bx, y: by, color: :white)
     $playerTurn = false
-    x2, y2 = -1, -1
-    8.times {|y|
-      8.times {|x|
-        if $b.can_put(x: x, y: y, color: :black)
-          x2 = x
-          y2 = y
-          break
-        end
-      }
+    # 打てる場所を探して最初の位置に打つだけアルゴリズム (意外と強い?)
+    Kernel.loop {
+      p = $b.find_places(color: :black)
+      break if p.length == 0
+      $b.put(x: p[0][0], y: p[0][1], color: :black)
+      break if $b.find_places(color: :white).length > 0
     }
-    $b.put(x: x2, y: y2, color: :black)
     $playerTurn = true
   end
-  puts "white=%d" % ($b.count(color: :white))
-  puts "black=%d" % ($b.count(color: :black))
+  w = $b.count(color: :white)
+  b = $b.count(color: :black)
+  puts "white: %d   black: %d" % [w, b]
+  break if w + b >= 64
 end

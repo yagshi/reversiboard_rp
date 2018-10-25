@@ -12,8 +12,12 @@ class ReversiBoard
 
   public
   # @!attribute data [rw]
-  # @return [Integer] 8x8 の配列で 0=空, 1=白, 2 =黒 として状態を保存. 行(y), 列(x)の順
+  #   @return [Integer] 8x8 の配列で 0=空, 1=白, 2 =黒 として状態を保存. 行(y), 列(x)の順
+  # @!attribute smooth_animation [rw]
+  #   @return [Boolean] #put メソッドで石を置いたときに反転が段階的に表示されるか
   attr_accessor :data
+  attr_accessor :smooth_animation
+
 
   # x, y 座標に石を配置. color は :black もしくは :white
   # @param x [Integer] x 座標 (0-7)
@@ -44,6 +48,7 @@ class ReversiBoard
             if cur == me
               x1, y1 = x + u, y + v
               while @data[y1][x1] == opp
+                @frames.insert 1, @data.map {|i| i.map{|j| j}} if smooth_animation
                 @data[y1][x1] = me
                 x1 = x1 + u
                 y1 = y1 + v
@@ -62,6 +67,7 @@ class ReversiBoard
 
   # @param sketch [Sketch] ruby-processing のスケッチ. 通常 self を渡せば ok
   def initialize(sketch)
+    @smooth_animation = true
     @rp = sketch
     @rp.size CSize * 8 + Padding * 2, CSize * 8 + Padding * 2
     @data = Array.new(8).map {Array.new(8).map {0}}
@@ -72,7 +78,7 @@ class ReversiBoard
     put(x: 4, y: 3, color: :black)
   end
 
-  # ゲーム盤表示 ruby-processing スケッチの draw から呼び出せばいい
+  # ゲーム盤表示 (ruby-processing スケッチの draw から呼び出す)
   # @return [nil]
   def show
     @rp.background 32, 120, 32
@@ -121,12 +127,12 @@ class ReversiBoard
     return [x1, y1]
   end
 
-  # その色がその場所に置けるかどうか true/false で返す.
+  # その色がその場所に置けるかどうか
   # @param x [Integer] x 座標 (0-7)
   # @param y [Integer] y 座標 (0-7)
   # @param color [Symbol] :white か :black
   # @return [Boolean]
-  def can_put(x: 0, y: 0, color: :white)
+  def can_put?(x: 0, y: 0, color: :white)
     raise "position out of range" if x < 0 || y < 0 || x > 7 || y > 7
     return false if @data[y][x] != 0
     me = (color == :white) ? 1 : 2
@@ -151,7 +157,7 @@ class ReversiBoard
     putFlag
   end
 
-  # 石の数を数える.
+  # 石の数を数える
   # @param color [Symbol] :white か :black
   # @return [Integer]
   def count(color: :white)
@@ -161,5 +167,18 @@ class ReversiBoard
         a + ((x == tgt) ? 1 : 0)
       }
     }
+  end
+
+  # 置ける場所を探す
+  # @param color [Symbol] :white か :black
+  # @return [Array] [x, y] の座標 (2要素配列) の配列
+  def find_places(color: :white)
+    ret = []
+    8.times {|y|
+      8.times {|x|
+        ret.push [x, y] if can_put?(x: x, y: y, color: color)
+      }
+    }
+    ret
   end
 end
