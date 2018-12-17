@@ -63,6 +63,7 @@ class ReversiBoard
         }
       }
     end
+    @frames[0] = @data
   end
 
   # @param sketch [Sketch] ruby-processing のスケッチ. 通常 self を渡せば ok
